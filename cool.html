@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DefendR OSINT - AI-Powered Threat Intelligence Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b, #0369a1);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .nav-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hero-section {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .main-dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #3b82f6;
+        }
+
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #06b6d4;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .risk-meter {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .risk-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+            border-radius: 15px;
+            transition: width 0.8s ease;
+            position: relative;
+        }
+
+        .risk-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .alerts-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .alerts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .alerts-title {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+            border-left: 4px solid;
+            animation: slideIn 0.5s ease;
+            transition: all 0.3s ease;
+        }
+
+        .alert-item:hover {
+            transform: translateX(5px);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .alert-high {
+            background: rgba(239, 68, 68, 0.2);
+            border-left-color: #ef4444;
+        }
+
+        .alert-medium {
+            background: rgba(245, 158, 11, 0.2);
+            border-left-color: #f59e0b;
+        }
+
+        .alert-low {
+            background: rgba(16, 185, 129, 0.2);
+            border-left-color: #10b981;
+        }
+
+        .alert-critical {
+            background: rgba(139, 69, 19, 0.3);
+            border-left-color: #dc2626;
+        }
+
+        .severity-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .severity-high { background: #ef4444; color: white; }
+        .severity-medium { background: #f59e0b; color: white; }
+        .severity-low { background: #10b981; color: white; }
+        .severity-critical { background: #dc2626; color: white; }
+
+        .alert-message {
+            flex: 1;
+            margin: 0 1rem;
+            font-size: 0.95rem;
+        }
+
+        .alert-time {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            font-family: monospace;
+        }
+
+        .osint-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .osint-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .osint-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .osint-card.expanded {
+            grid-column: 1 / -1;
+            transform: none;
+        }
+
+        .osint-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .osint-header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .osint-icon {
+            font-size: 2rem;
+            color: #06b6d4;
+        }
+
+        .osint-title {
+            font-size: 1.3rem;
+            color: #3b82f6;
+        }
+
+        .expand-btn {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .expand-btn:hover {
+            background: rgba(59, 130, 246, 0.4);
+        }
+
+        .card-content {
+            max-height: 300px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        .card-content.expanded {
+            max-height: none;
+        }
+
+        .card-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .card-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .card-content::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 3px;
+        }
+
+        .social-item, .news-item, .darkweb-item {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border-left: 3px solid;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .social-item.twitter { border-left-color: #1da1f2; }
+        .social-item.instagram { border-left-color: #e4405f; }
+        .social-item.facebook { border-left-color: #4267B2; }
+        .social-item.linkedin { border-left-color: #0077b5; }
+        .social-item.telegram { border-left-color: #0088cc; }
+        .news-item { border-left-color: #f59e0b; }
+        .darkweb-item { border-left-color: #dc2626; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .social-platform {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .social-content, .news-content, .darkweb-content {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+        }
+
+        .social-meta, .news-meta, .darkweb-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .news-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #fbbf24;
+        }
+
+        .darkweb-source {
+            font-size: 0.8rem;
+            color: #dc2626;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .expanded-alerts {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .expanded-alerts h4 {
+            color: #3b82f6;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-tab.active {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+        }
+
+        .profile-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border-left: 3px solid #06b6d4;
+        }
+
+        .profile-label {
+            font-weight: bold;
+            color: #06b6d4;
+        }
+
+        .profile-value {
+            font-family: monospace;
+            opacity: 0.9;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #06b6d4;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #3b82f6;
+        }
+
+        .feature-description {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .footer {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-tagline {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #3b82f6;
+        }
+
+        .footer-text {
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .osint-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .osint-card.expanded {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                🛡️ DefendR OSINT
+            </div>
+            <div class="nav-status">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>OSINT Active</span>
+                </div>
+                <div style="color: #06b6d4;">AI Engine: Online</div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <h1 class="hero-title">DefendR OSINT Platform</h1>
+        <p class="hero-subtitle">AI-Powered Open Source Intelligence & Threat Detection</p>
+    </div>
+
+    <div class="main-dashboard">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-number" id="threats">247</div>
+                <div class="stat-label">Threats Detected Today</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📱</div>
+                <div class="stat-number" id="social-mentions">1,843</div>
+                <div class="stat-label">Social Media Mentions</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-number" id="risk-score">73</div>
+                <div class="stat-label">Risk Score</div>
+                <div class="risk-meter">
+                    <div class="risk-bar" id="risk-bar" style="width: 73%"></div>
+                </div>
+                <div style="font-size: 0.9rem; opacity: 0.8;">Medium Risk Level</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🔍</div>
+                <div class="stat-number" id="profiles">156</div>
+                <div class="stat-label">Profiles Analyzed</div>
+            </div>
+        </div>
+
+        <div class="alerts-section">
+            <div class="alerts-header">
+                <h2 class="alerts-title">
+                    🚨 Live OSINT Alerts
+                </h2>
+                <div style="color: #10b981; font-size: 0.9rem;">
+                    Last updated: <span id="last-updated">Now</span>
+                </div>
+            </div>
+            <div id="alerts-container">
+                <!-- Alerts will be generated here -->
+            </div>
+        </div>
+
+        <div class="osint-grid">
+            <div class="osint-card" id="social-card">
+                <div class="osint-header">
+                    <div class="osint-header-left">
+                        <div class="osint-icon">📱</div>
+                        <h3 class="osint-title">Social Media Intelligence</h3>
+                    </div>
+                    <button class="expand-btn" onclick="toggleCard('social')">View All</button>
+                </div>
+                <div class="card-content" id="social-feed">
+                    <!-- Social media content will be populated here -->
+                </div>
+            </div>
+
+            <div class="osint-card" id="news-card">
+                <div class="osint-header">
+                    <div class="osint-header-left">
+                        <div class="osint-icon">📰</div>
+                        <h3 class="osint-title">News & Threat Intelligence</h3>
+                    </div>
+                    <button class="expand-btn" onclick="toggleCard('news')">View All</button>
+                </div>
+                <div class="card-content" id="news-feed">
+                    <!-- News content will be populated here -->
+                </div>
+            </div>
+
+            <div class="osint-card" id="darkweb-card">
+                <div class="osint-header">
+                    <div class="osint-header-left">
+                        <div class="osint-icon">🌐</div>
+                        <h3 class="osint-title">Dark Web Monitoring</h3>
+                    </div>
+                    <button class="expand-btn" onclick="toggleCard('darkweb')">View All</button>
+                </div>
+                <div class="card-content" id="darkweb-feed">
+                    <!-- Dark web intelligence will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <div class="profile-header">
+                <div class="osint-icon">👤</div>
+                <h3 class="osint-title">Threat Actor Profile Analysis</h3>
+            </div>
+            <div id="profile-container">
+                <!-- Profile analysis will be populated here -->
+            </div>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3 class="feature-title">AI Pattern Recognition</h3>
+                <p class="feature-description">Advanced ML algorithms analyze social media, news, and dark web data to identify emerging threats and patterns</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3 class="feature-title">Social Media Monitoring</h3>
+                <p class="feature-description">Real-time monitoring of Twitter, Instagram, Facebook, LinkedIn, and Telegram for threat intelligence</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3 class="feature-title">Profile Intelligence</h3>
+                <p class="feature-description">Create detailed profiles of threat actors, their connections, and behavioral patterns from public data</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3 class="feature-title">Dark Web Intelligence</h3>
+                <p class="feature-description">Monitor dark web forums, marketplaces, and communications for threats against your organization</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-tagline">DefendR OSINT: AI-Powered Open Source Intelligence for Digital Security</div>
+            <div class="footer-text">Protecting businesses through comprehensive threat intelligence from social media, news, and dark web sources</div>
+        </div>
+    </footer>
+
+    <script>
+        // Enhanced data with OSINT sources
+        let threatCount = 247;
+        let socialMentions = 1843;
+        let riskScore = 73;
+        let profileCount = 156;
+
+        // Comprehensive alert database with source categorization
+        const alertDatabase = {
+            social: [
+                { type: 'Malware discussion detected on Telegram channel', severity: 'HIGH', source: 'Telegram', location: 'Mumbai', details: 'Banking trojan distribution campaign targeting Indian users' },
+                { type: 'Phishing campaign spread via Facebook groups', severity: 'HIGH', source: 'Facebook', location: 'Delhi', details: 'Fake government benefit schemes targeting elderly citizens' },
+                { type: 'Threat actor recruiting on Twitter', severity: 'MEDIUM', source: 'Twitter', location: 'Bangalore', details: 'Cybercriminal group seeking technical expertise for ransomware operations' },
+                { type: 'Social engineering techniques shared on LinkedIn', severity: 'MEDIUM', source: 'LinkedIn', location: 'Chennai', details: 'Business email compromise tactics being discussed in professional groups' },
+                { type: 'Suspicious profile creating fake company pages', severity: 'MEDIUM', source: 'LinkedIn', location: 'Pune', details: 'Impersonating tech startups to collect employee credentials' },
+                { type: 'Cryptocurrency scam promotion on Instagram', severity: 'HIGH', source: 'Instagram', location: 'Hyderabad', details: 'Fake celebrity endorsements for fraudulent investment schemes' },
+                { type: 'Telegram bot distributing malware', severity: 'CRITICAL', source: 'Telegram', location: 'Kolkata', details: 'Automated distribution of banking trojans via chat bots' }
+            ],
+            news: [
+                { type: 'Major data breach affects Indian banks', severity: 'CRITICAL', source: 'Financial News', location: 'Mumbai', details: 'Over 2 million customer records compromised' },
+                { type: 'Government warning about mobile banking threats', severity: 'HIGH', source: 'CERT-In', location: 'Delhi', details: 'New Android malware targeting UPI applications' },
+                { type: 'Cybercrime surge during festival season', severity: 'MEDIUM', source: 'Economic Times', location: 'Pan-India', details: 'Increased phishing attacks targeting online shoppers' },
+                { type: 'Healthcare sector under ransomware attack', severity: 'CRITICAL', source: 'Healthcare IT News', location: 'Bangalore', details: 'Multiple hospitals affected by coordinated ransomware campaign' },
+                { type: 'Educational institutions targeted by hackers', severity: 'HIGH', source: 'Education Today', location: 'Chennai', details: 'Student data theft from online learning platforms' }
+            ],
+            darkweb: [
+                { type: 'Indian credentials for sale on dark marketplace', severity: 'CRITICAL', source: 'DarkMarket_IN', location: 'Mumbai', details: 'Banking credentials priced ₹50-200 per account' },
+                { type: 'Aadhaar database being sold in bulk', severity: 'CRITICAL', source: 'DataBazaar', location: 'Delhi', details: '10M verified identity records with PAN linkage' },
+                { type: 'Corporate network access advertised', severity: 'HIGH', source: 'UndergroundForum', location: 'Bangalore', details: 'Admin access to government contractor systems' },
+                { type: 'Ransomware-as-a-Service targeting Indian SMEs', severity: 'HIGH', source: 'CriminalChat', location: 'Pune', details: 'Revenue sharing model with 70/30 split' },
+                { type: 'Zero-day exploit being traded', severity: 'CRITICAL', source: 'ExploitMarket', location: 'Chennai', details: 'Unpatched vulnerability in popular Indian software' }
+            ]
+        };
+
+        // Enhanced content arrays
+        const socialContent = [
+            { platform: 'twitter', content: 'New malware variant targeting Indian banking apps detected. Campaign active since yesterday. #CyberSecurity', user: '@SecurityResearcher', time: '2m ago' },
+            { platform: 'telegram', content: 'WARNING: Fake job posting scam spreading rapidly. Over 500 victims reported in Mumbai region.', user: 'CyberAlert_IN', time: '5m ago' },
+            { platform: 'linkedin', content: 'Phishing emails impersonating government officials increased 300% this week. Be vigilant.', user: 'InfoSec Analyst', time: '12m ago' },
+            { platform: 'facebook', content: 'Urgent: Fake UPI payment apps being distributed through social media. Do not download.', user: 'CyberCrime Cell', time: '18m ago' },
+            { platform: 'instagram', content: 'Cryptocurrency scam using celebrity deepfakes spreading on Instagram stories.', user: 'DigitalSafety', time: '25m ago' },
+            { platform: 'twitter', content: 'Ransomware group targeting Indian healthcare sector. Multiple hospitals affected.', user: '@ThreatHunter', time: '32m ago' }
+        ];
+
+        const newsContent = [
+            { title: 'Major Data Breach Exposes 2M Indian Bank Customers', content: 'Security researchers discovered a massive data breach affecting major Indian banks...', source: 'CyberNews India', time: '1h ago' },
+            { title: 'Government Issues Warning About New Mobile Banking Trojan', content: 'CERT-In has issued an advisory about a new Android banking trojan...', source: 'Economic Times', time: '2h ago' },
+            { title: 'Cybercriminals Target Indian E-commerce During Festival Season', content: 'Increased phishing attacks targeting online shoppers reported...', source: 'Times of India', time: '3h ago' },
+            { title: 'Dark Web
